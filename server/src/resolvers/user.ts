@@ -58,7 +58,51 @@ class UserResponse {
 }
 @Resolver()
 export default class UserResolver {
-  /*-------------------getUsers--------------------*/
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token:string,
+    @Arg("newPassword") newPassword:string,
+    @Ctx() {em,req,redis}:MyContext
+  ):Promise<UserResponse>{
+    if (newPassword.length < 4) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: "password must be greater than 3 chars",
+          },
+        ],
+      }
+    }
+    const userId = await redis.get(FORGOT_PASSWORD_PREFIX + token)
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      }
+    }
+    const user = await em.findOne(User, { _id:parseInt(userId) });
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      }
+    }
+    user.password = await argon2.hash(newPassword);
+    await em.persistAndFlush(user)
+
+    req.session.userId = parseInt(userId);
+    return {user};
+  }
+  /*-------------------Forgot password--------------------*/
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
@@ -89,7 +133,7 @@ export default class UserResolver {
   }
   @Query(() => User, { nullable: true })
   async me(@Ctx() { em, req }: MyContext) {
-    console.log(req.session);
+    // console.log(req.session);
     if (!req.session.userId) {
       return null;
     }
