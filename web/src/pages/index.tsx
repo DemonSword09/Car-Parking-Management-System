@@ -1,15 +1,18 @@
-import { withUrqlClient } from "next-urql";
+import { Container } from "../components/Container";
+import { DarkModeSwitch } from "../components/DarkModeSwitch";
 import React from "react";
 import NavBar from "../components/NavBar";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import styles from "../styles/index.module.css"
-const Index = () => {
-  return (
-    <div className={styles.bg}>
-      <NavBar />
-      <h2 style={{color:"white"}}>Car Parking Management System</h2>
-    </div>
-  );
-};
+import BookSlotCard from "../components/BookSlotCard";
+import Footer from "../components/Footer";
+const bg = require("../img/bg.jpg")
+const Index = () => (
+  <Container h="120vh" bg={bg} className={styles.bg}>
+    <NavBar/>
+    <BookSlotCard/>
+    <Footer/>
+    <DarkModeSwitch />
+  </Container>
+);
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default Index;

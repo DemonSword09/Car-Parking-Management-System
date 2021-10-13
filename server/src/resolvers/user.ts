@@ -108,6 +108,9 @@ export default class UserResolver {
     @Arg("email") email: string,
     @Ctx() { em, redis }: MyContext
   ) {
+    if (!validateEmail(email)) {
+      return false;
+    }
     const user = await em.findOne(User, { email });
     if (!user) {
       //no email in db

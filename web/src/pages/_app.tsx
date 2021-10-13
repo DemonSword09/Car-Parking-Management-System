@@ -1,10 +1,10 @@
-import { ChakraProvider, ColorModeProvider } from "@chakra-ui/react";
-import theme from "../theme";
+import { ChakraProvider, ColorModeProvider } from '@chakra-ui/react'
 
-function MyApp({ Component, pageProps }: any) {
+import theme from '../theme'
+
+function MyApp({ Component, pageProps }) {
   return (
-    <div style={{height:"100vh",width:"100vw"}}>
-    <ChakraProvider  theme={theme}>
+    <ChakraProvider resetCSS theme={theme}>
       <ColorModeProvider
         options={{
           useSystemColorMode: true,
@@ -13,8 +13,7 @@ function MyApp({ Component, pageProps }: any) {
         <Component {...pageProps} />
       </ColorModeProvider>
     </ChakraProvider>
-    </div>
-  );
+  )
 }
 
-export default MyApp;
+export default MyApp

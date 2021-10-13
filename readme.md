@@ -10,7 +10,7 @@ cd server
 
 install dependencies - 
 ```bash
-yarn add
+yarn install
 ```
  
 convert typeScript file to javaScript files
@@ -31,7 +31,7 @@ cd ../web
 
 install dependencies -
 ```bash 
-yarn add
+yarn install
 ```
  
 to run server - 
