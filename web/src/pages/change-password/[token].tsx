@@ -3,7 +3,15 @@ import { NextPage } from "next";
 import router from "next/router";
 import React, { FunctionComponent, PropsWithChildren, useState } from "react";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { Box, Button, Flex, Heading, Link, Stack, useColorModeValue } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Link,
+  Stack,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import InputFeild from "../../components/inputFeild";
 import { useChangePasswordMutation } from "../../generated/graphql";
 import NextLink from "next/link";
@@ -12,6 +20,8 @@ import { createUrqlClient } from "../../utils/createUrqlClient";
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   const [, changePassword] = useChangePasswordMutation();
   const [tokenError, settokenError] = useState("");
+  console.log(token);
+
   return (
     <Flex
       minH={"100vh"}

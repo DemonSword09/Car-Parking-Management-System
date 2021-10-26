@@ -11,6 +11,7 @@ import UserResolver from "./resolvers/user";
 import { SECRECT, __prod__ } from "./constants";
 import { MyContext } from "./types";
 import cors from "cors";
+import SlotResolver from "./resolvers/slot";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -43,7 +44,7 @@ const main = async () => {
   );
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [UserResolver, SlotResolver],
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
@@ -56,7 +57,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app, cors: false });
   app.listen(4000, () =>
-    console.log("server running on http://localhost:4000")
+    console.log("server running on http://localhost:4000/graphql")
   );
 };
 

@@ -27,6 +27,7 @@ export type Mutation = {
   login: UserResponse;
   addUser: UserResponse;
   logout: Scalars['Boolean'];
+  bookSlot: Scalars['Boolean'];
 };
 
 
@@ -50,10 +51,25 @@ export type MutationAddUserArgs = {
   options: UserInput;
 };
 
+
+export type MutationBookSlotArgs = {
+  id: Scalars['Float'];
+};
+
 export type Query = {
   __typename?: 'Query';
   getUsers: Array<User>;
   me?: Maybe<User>;
+  getSlots: Array<Slot>;
+};
+
+export type Slot = {
+  __typename?: 'Slot';
+  id: Scalars['Int'];
+  cost: Scalars['Int'];
+  updatedAt: Scalars['String'];
+  bookedby: Scalars['String'];
+  booked: Scalars['Boolean'];
 };
 
 export type User = {
@@ -101,6 +117,16 @@ export type RegUserResponseFragment = (
     { __typename?: 'User' }
     & RegUserFragment
   )> }
+);
+
+export type BookSlotMutationVariables = Exact<{
+  id: Scalars['Float'];
+}>;
+
+
+export type BookSlotMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'bookSlot'>
 );
 
 export type ChangePasswordMutationVariables = Exact<{
@@ -161,6 +187,17 @@ export type RegisterMutation = (
   ) }
 );
 
+export type GetSlotsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSlotsQuery = (
+  { __typename?: 'Query' }
+  & { getSlots: Array<(
+    { __typename?: 'Slot' }
+    & Pick<Slot, 'id' | 'cost' | 'updatedAt' | 'booked' | 'bookedby'>
+  )> }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -195,6 +232,15 @@ export const RegUserResponseFragmentDoc = gql`
 }
     ${RegErrorFragmentDoc}
 ${RegUserFragmentDoc}`;
+export const BookSlotDocument = gql`
+    mutation bookSlot($id: Float!) {
+  bookSlot(id: $id)
+}
+    `;
+
+export function useBookSlotMutation() {
+  return Urql.useMutation<BookSlotMutation, BookSlotMutationVariables>(BookSlotDocument);
+};
 export const ChangePasswordDocument = gql`
     mutation changePassword($token: String!, $newPassword: String!) {
   changePassword(token: $token, newPassword: $newPassword) {
@@ -245,6 +291,21 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const GetSlotsDocument = gql`
+    query getSlots {
+  getSlots {
+    id
+    cost
+    updatedAt
+    booked
+    bookedby
+  }
+}
+    `;
+
+export function useGetSlotsQuery(options: Omit<Urql.UseQueryArgs<GetSlotsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<GetSlotsQuery>({ query: GetSlotsDocument, ...options });
 };
 export const MeDocument = gql`
     query Me {

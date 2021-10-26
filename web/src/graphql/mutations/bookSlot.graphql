@@ -1,0 +1,3 @@
+mutation bookSlot($id: Float!) {
+  bookSlot(id: $id)
+}
