@@ -14,6 +14,12 @@ export type Scalars = {
   Float: number;
 };
 
+export type Arr = {
+  __typename?: 'ARR';
+  time: Scalars['String'];
+  id: Scalars['Float'];
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -27,6 +33,9 @@ export type Mutation = {
   login: UserResponse;
   addUser: UserResponse;
   logout: Scalars['Boolean'];
+  updateUser: UserResponse;
+  addSlot: Slot;
+  deleteBooking: Scalars['Boolean'];
   bookSlot: Scalars['Boolean'];
 };
 
@@ -52,7 +61,20 @@ export type MutationAddUserArgs = {
 };
 
 
+export type MutationUpdateUserArgs = {
+  vehicles: Scalars['String'];
+  mobileno: Scalars['Float'];
+};
+
+
+export type MutationDeleteBookingArgs = {
+  n: Scalars['Float'];
+  id: Scalars['Float'];
+};
+
+
 export type MutationBookSlotArgs = {
+  n: Scalars['Float'];
   id: Scalars['Float'];
 };
 
@@ -60,25 +82,39 @@ export type Query = {
   __typename?: 'Query';
   getUsers: Array<User>;
   me?: Maybe<User>;
+  getUser?: Maybe<User>;
   getSlots: Array<Slot>;
+  getUserSlots?: Maybe<Array<Arr>>;
+};
+
+
+export type QueryGetUserArgs = {
+  id: Scalars['Float'];
 };
 
 export type Slot = {
   __typename?: 'Slot';
   id: Scalars['Int'];
-  cost: Scalars['Int'];
+  createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
-  bookedby: Scalars['String'];
-  booked: Scalars['Boolean'];
+  timings: Array<SlotTimings>;
+};
+
+export type SlotTimings = {
+  __typename?: 'SlotTimings';
+  time: Scalars['String'];
+  bookedby?: Maybe<Scalars['Float']>;
 };
 
 export type User = {
   __typename?: 'User';
-  _id: Scalars['Int'];
+  id: Scalars['Int'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   email: Scalars['String'];
   username: Scalars['String'];
+  mobileno?: Maybe<Scalars['Float']>;
+  vehicles?: Maybe<Scalars['String']>;
 };
 
 export type UserInput = {
@@ -105,7 +141,7 @@ export type RegErrorFragment = (
 
 export type RegUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, '_id' | 'username'>
+  & Pick<User, 'id' | 'username'>
 );
 
 export type RegUserResponseFragment = (
@@ -121,6 +157,7 @@ export type RegUserResponseFragment = (
 
 export type BookSlotMutationVariables = Exact<{
   id: Scalars['Float'];
+  n: Scalars['Float'];
 }>;
 
 
@@ -187,6 +224,20 @@ export type RegisterMutation = (
   ) }
 );
 
+export type UpdateUserMutationVariables = Exact<{
+  vehicles: Scalars['String'];
+  mobileno: Scalars['Float'];
+}>;
+
+
+export type UpdateUserMutation = (
+  { __typename?: 'Mutation' }
+  & { updateUser: (
+    { __typename?: 'UserResponse' }
+    & RegUserResponseFragment
+  ) }
+);
+
 export type GetSlotsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -194,8 +245,36 @@ export type GetSlotsQuery = (
   { __typename?: 'Query' }
   & { getSlots: Array<(
     { __typename?: 'Slot' }
-    & Pick<Slot, 'id' | 'cost' | 'updatedAt' | 'booked' | 'bookedby'>
+    & Pick<Slot, 'id' | 'createdAt' | 'updatedAt'>
+    & { timings: Array<(
+      { __typename?: 'SlotTimings' }
+      & Pick<SlotTimings, 'time' | 'bookedby'>
+    )> }
   )> }
+);
+
+export type GetUserQueryVariables = Exact<{
+  id: Scalars['Float'];
+}>;
+
+
+export type GetUserQuery = (
+  { __typename?: 'Query' }
+  & { getUser?: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'username' | 'email' | 'mobileno' | 'vehicles'>
+  )> }
+);
+
+export type GetUserSlotsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUserSlotsQuery = (
+  { __typename?: 'Query' }
+  & { getUserSlots?: Maybe<Array<(
+    { __typename?: 'ARR' }
+    & Pick<Arr, 'id' | 'time'>
+  )>> }
 );
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -217,7 +296,7 @@ export const RegErrorFragmentDoc = gql`
     `;
 export const RegUserFragmentDoc = gql`
     fragment RegUser on User {
-  _id
+  id
   username
 }
     `;
@@ -233,8 +312,8 @@ export const RegUserResponseFragmentDoc = gql`
     ${RegErrorFragmentDoc}
 ${RegUserFragmentDoc}`;
 export const BookSlotDocument = gql`
-    mutation bookSlot($id: Float!) {
-  bookSlot(id: $id)
+    mutation bookSlot($id: Float!, $n: Float!) {
+  bookSlot(id: $id, n: $n)
 }
     `;
 
@@ -292,20 +371,60 @@ export const RegisterDocument = gql`
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
+export const UpdateUserDocument = gql`
+    mutation updateUser($vehicles: String!, $mobileno: Float!) {
+  updateUser(vehicles: $vehicles, mobileno: $mobileno) {
+    ...RegUserResponse
+  }
+}
+    ${RegUserResponseFragmentDoc}`;
+
+export function useUpdateUserMutation() {
+  return Urql.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument);
+};
 export const GetSlotsDocument = gql`
     query getSlots {
   getSlots {
     id
-    cost
+    createdAt
     updatedAt
-    booked
-    bookedby
+    timings {
+      time
+      bookedby
+    }
   }
 }
     `;
 
 export function useGetSlotsQuery(options: Omit<Urql.UseQueryArgs<GetSlotsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<GetSlotsQuery>({ query: GetSlotsDocument, ...options });
+};
+export const GetUserDocument = gql`
+    query getUser($id: Float!) {
+  getUser(id: $id) {
+    id
+    username
+    email
+    mobileno
+    vehicles
+  }
+}
+    `;
+
+export function useGetUserQuery(options: Omit<Urql.UseQueryArgs<GetUserQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<GetUserQuery>({ query: GetUserDocument, ...options });
+};
+export const GetUserSlotsDocument = gql`
+    query getUserSlots {
+  getUserSlots {
+    id
+    time
+  }
+}
+    `;
+
+export function useGetUserSlotsQuery(options: Omit<Urql.UseQueryArgs<GetUserSlotsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<GetUserSlotsQuery>({ query: GetUserSlotsDocument, ...options });
 };
 export const MeDocument = gql`
     query Me {

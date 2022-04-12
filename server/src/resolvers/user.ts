@@ -15,16 +15,15 @@ import argon2 from "argon2";
 import { sendEmail } from "../utils/sendEmails";
 import { v4 } from "uuid";
 import { FORGOT_PASSWORD_PREFIX } from "../constants";
+import { validateEmail, validateRegister } from "../utils/validateRegister";
+import { getConnection } from "typeorm";
 
 declare module "express-session" {
   export interface SessionData {
     userId: number;
   }
 }
-function validateEmail(email:UserInput["email"]) {
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-}
+
 @InputType()
 class UserInput {
   @Field()
@@ -58,12 +57,14 @@ class UserResponse {
 }
 @Resolver()
 export default class UserResolver {
+  /*-------------------Change password--------------------*/
+
   @Mutation(() => UserResponse)
   async changePassword(
-    @Arg("token") token:string,
-    @Arg("newPassword") newPassword:string,
-    @Ctx() {em,req,redis}:MyContext
-  ):Promise<UserResponse>{
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { req, redis }: MyContext
+  ): Promise<UserResponse> {
     if (newPassword.length < 4) {
       return {
         errors: [
@@ -72,9 +73,10 @@ export default class UserResolver {
             message: "password must be greater than 3 chars",
           },
         ],
-      }
+      };
     }
-    const userId = await redis.get(FORGOT_PASSWORD_PREFIX + token)
+    const key = FORGOT_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
     if (!userId) {
       return {
         errors: [
@@ -83,9 +85,10 @@ export default class UserResolver {
             message: "token expired",
           },
         ],
-      }
+      };
     }
-    const user = await em.findOne(User, { _id:parseInt(userId) });
+    const userIdnum = parseInt(userId);
+    const user = await User.findOne(userIdnum);
     if (!user) {
       return {
         errors: [
@@ -94,24 +97,29 @@ export default class UserResolver {
             message: "user no longer exists",
           },
         ],
-      }
+      };
     }
-    user.password = await argon2.hash(newPassword);
-    await em.persistAndFlush(user)
-
-    req.session.userId = parseInt(userId);
-    return {user};
+    await User.update(
+      { id: userIdnum },
+      { password: await argon2.hash(newPassword) }
+    );
+    await redis.del(key);
+    // log in user after change password
+    req.session.userId = user.id;
+    return { user };
   }
+
   /*-------------------Forgot password--------------------*/
+
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { redis }: MyContext
   ) {
     if (!validateEmail(email)) {
       return false;
     }
-    const user = await em.findOne(User, { email });
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       //no email in db
       return true;
@@ -119,7 +127,7 @@ export default class UserResolver {
     const token = v4();
     await redis.set(
       FORGOT_PASSWORD_PREFIX + token,
-      user._id,
+      user.id,
       "ex",
       1000 * 60 * 60 * 5
     ); //5hrs
@@ -131,34 +139,36 @@ export default class UserResolver {
   }
   /*-------------------getUsers--------------------*/
   @Query(() => [User])
-  getUsers(@Ctx() { em }: MyContext): Promise<User[]> {
-    return em.find(User, {});
+  getUsers(): Promise<User[]> {
+    return User.find();
   }
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext) {
+  me(@Ctx() { req }: MyContext) {
     // console.log(req.session);
     if (!req.session.userId) {
       return null;
     }
-    const user = await em.findOne(User, { _id: req.session.userId });
+    return User.findOne(req.session.userId);
+  }
+  @Query(() => User, { nullable: true })
+  async getUser(@Arg("id") id: number) {
+    const user = await User.findOne(id);
+    if (!user) {
+      return null;
+    }
     return user;
   }
   // /*-------------------getUser--------------------*/
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UserLogin,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    let user;
-    if (options.emailOrUsername.includes("@")) {
-      user = await em.findOne(User, {
-        email: options.emailOrUsername,
-      });
-    } else {
-      user = await em.findOne(User, {
-        username: options.emailOrUsername,
-      });
-    }
+    const user = await User.findOne(
+      options.emailOrUsername.includes("@")
+        ? { where: { email: options.emailOrUsername } }
+        : { where: { username: options.emailOrUsername } }
+    );
     if (!user) {
       return {
         errors: [
@@ -180,8 +190,8 @@ export default class UserResolver {
         ],
       };
     }
-    req.session.userId = user._id;
-
+    // console.log(user);
+    req.session.userId = user.id;
     return { user };
   }
 
@@ -189,62 +199,52 @@ export default class UserResolver {
   @Mutation(() => UserResponse)
   async addUser(
     @Arg("options") options: UserInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-
-    if (!validateEmail(options.email)) {
-      return {
-        errors: [
-          {
-            field: "email",
-            message: "email must be valid",
-          },
-        ],
-      };
-    }
-    if (options.username.length <= 2) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "username must be greater than 2 chars",
-          },
-        ],
-      };
-    }
-    if (options.password.length < 4) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "password must be greater than 3 chars",
-          },
-        ],
-      };
+    const errors = validateRegister(options);
+    if (errors) {
+      return { errors };
     }
     const hashedpass = await argon2.hash(options.password);
-    const user = em.create(User, {
-      email: options.email,
-      username: options.username,
-      password: hashedpass,
-    });
+    let user;
     try {
-      await em.persistAndFlush(user);
+      // User.create({}).save()
+      const result = await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({
+          username: options.username,
+          email: options.email,
+          password: hashedpass,
+        })
+        .returning("*")
+        .execute();
+      user = result.raw[0];
     } catch (err) {
-      // duplicat username error
-      // || err.detail.includes("already exists")
+      //|| err.detail.includes("already exists")) {
+      // duplicate username error
+      let errors;
       if (err.code === "23505") {
-        return {
-          errors: [
+        if (err.length == 227) {
+          errors = [
             {
               field: "username",
-              message: "username is already taken",
+              message: "username already taken",
             },
-          ],
-        };
+          ];
+        } else {
+          errors = [
+            {
+              field: "email",
+              message: "account with this email already exists",
+            },
+          ];
+        }
+        return { errors };
       }
     }
-    req.session.userId = user._id;
+    req.session.userId = user.id;
     return { user };
   }
   /*-------------------deleteUser--------------------*/
@@ -261,5 +261,36 @@ export default class UserResolver {
         resolve(true);
       });
     });
+  }
+  @Mutation(() => UserResponse)
+  async updateUser(
+    @Arg("mobileno") mobileno: number,
+    @Arg("vehicles") vehicles: string,
+    @Ctx() { req, redis }: MyContext
+  ): Promise<UserResponse> {
+    if (!req.session.userId) {
+      return {
+        errors: [
+          {
+            field: "user",
+            message: "user not logged in",
+          },
+        ],
+      };
+    }
+    let user = await User.findOne(req.session.userId);
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "user",
+            message: "user does not exist",
+          },
+        ],
+      };
+    }
+
+    await User.update({ id: user.id }, { mobileno, vehicles });
+    return { user };
   }
 }

@@ -13,10 +13,94 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import React from "react";
+import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
+  const [{ data, fetching }] = useMeQuery();
+  const [, logout] = useLogoutMutation();
 
+  let body;
+  if (fetching) {
+  }
+  //user not logged in
+  else if (!data?.me) {
+    body = (
+      <Stack
+        flex={{ base: 1, md: 0 }}
+        justify={"flex-end"}
+        direction={"row"}
+        spacing={6}
+      >
+        <Button
+          as={"a"}
+          fontSize={"m"}
+          fontWeight={400}
+          variant={"link"}
+          href={"/login"}
+        >
+          Log In
+        </Button>
+        <Link
+          href={"/register"}
+          _hover={{
+            color: "white",
+          }}
+        >
+          <Button
+            size="sm"
+            display={{ base: "none", md: "inline-flex" }}
+            fontSize={"sm"}
+            fontWeight={600}
+            colorScheme="teal"
+            variant={useColorModeValue("solid", "outline")}
+            _hover={{
+              bg: "teal",
+            }}
+          >
+            Register
+          </Button>
+        </Link>
+      </Stack>
+    );
+  }
+  //user logged in
+  else {
+    body = (
+      <Stack
+        flex={{ base: 1, md: 0 }}
+        justify={"flex-end"}
+        direction={"row"}
+        spacing={6}
+      >
+        <Button
+          as={"a"}
+          fontSize={"m"}
+          fontWeight={400}
+          variant={"link"}
+          href={`/user/${data.me.id}`}
+        >
+          {data.me.username}
+        </Button>
+        <Button
+          size="sm"
+          display={{ base: "none", md: "inline-flex" }}
+          fontSize={"sm"}
+          fontWeight={600}
+          colorScheme="teal"
+          variant={useColorModeValue("solid", "outline")}
+          _hover={{
+            bg: "teal",
+          }}
+          onClick={() => {
+            logout();
+          }}
+        >
+          Logout
+        </Button>
+      </Stack>
+    );
+  }
   return (
     <Box w="100%">
       <Flex
@@ -44,50 +128,30 @@ export default function NavBar() {
             aria-label={"Toggle Navigation"}
           />
         </Flex>
-        <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
+        <Flex
+          flex={{ base: 1 }}
+          pt={1}
+          justify={{ base: "center", md: "start" }}
+        >
           <Text
             textAlign={useBreakpointValue({ base: "center", md: "left" })}
             fontFamily={"heading"}
-            ml={4}
+            ml={{ base: "auto", md: "initial" }}
+            mr={{ base: "auto", md: "initial" }}
             color={useColorModeValue("gray.800", "white")}
           >
-            Park-A-Lot
+            Parkify
           </Text>
-          <Flex display={{ base: "none", md: "flex" }} ml="auto" mr="auto">
+          <Flex
+            display={{ base: "none", md: "flex" }}
+            w={"100%"}
+            justifyContent={"center"}
+            alignItems={"center"}
+          >
             <DesktopNav />
           </Flex>
+          {body}
         </Flex>
-
-        <Stack
-          flex={{ base: 1, md: 0 }}
-          justify={"flex-end"}
-          direction={"row"}
-          spacing={6}
-        >
-          <Button
-            as={"a"}
-            fontSize={"sm"}
-            fontWeight={400}
-            variant={"link"}
-            href={"/login"}
-          >
-            Log In
-          </Button>
-          <Button
-            size="sm"
-            display={{ base: "none", md: "inline-flex" }}
-            fontSize={"sm"}
-            fontWeight={600}
-            colorScheme="teal"
-            variant={useColorModeValue("solid", "outline")}
-            href={"/register"}
-            _hover={{
-              bg: "teal",
-            }}
-          >
-            Register
-          </Button>
-        </Stack>
       </Flex>
 
       <Collapse in={isOpen} animateOpacity>

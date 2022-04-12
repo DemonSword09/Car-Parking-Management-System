@@ -1,33 +1,35 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { ObjectType, Field, Int } from "type-graphql";
-function diff_minutes(dt2: Date, dt1: Date) {
-  var diff = (dt2.getTime() - dt1.getTime()) / 1000;
-  return Math.abs(Math.round(diff));
+import { ObjectType, Field, Int, InputType } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+@ObjectType()
+class SlotTimings {
+  @Field()
+  time: string;
+  @Field({ nullable: true })
+  bookedby?: number;
 }
 @ObjectType()
 @Entity()
-export class Slot {
+export class Slot extends BaseEntity {
   @Field(() => Int)
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(() => Int)
-  @Property({
-    onUpdate: (slot: Slot) => {
-      slot.booked ? diff_minutes(new Date(), slot.updatedAt) : 0;
-    },
-  })
-  cost: number;
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt = Date;
 
   @Field(() => String)
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @UpdateDateColumn()
+  updatedAt = Date;
 
-  @Field(() => String)
-  @Property()
-  bookedby: string;
-
-  @Field(() => Boolean)
-  @Property()
-  booked!: boolean;
+  @Field(() => [SlotTimings])
+  @Column("simple-json")
+  timings!: SlotTimings[];
 }

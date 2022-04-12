@@ -27,11 +27,13 @@ const Login = () => {
       <Formik
         initialValues={{ emailOrUsername: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
+          console.log(values);
+
           const response = await login({ options: values });
-          // console.log(user)
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
+            console.log(response.data.login);
             router.push("/");
           }
         }}

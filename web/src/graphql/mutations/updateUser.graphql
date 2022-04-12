@@ -1,0 +1,5 @@
+mutation updateUser($vehicles: String!, $mobileno: Float!) {
+  updateUser(vehicles: $vehicles, mobileno: $mobileno) {
+    ...RegUserResponse
+  }
+}

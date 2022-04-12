@@ -49,7 +49,7 @@ export default function Footer() {
       bg={useColorModeValue("gray.50", "gray.900")}
       color={useColorModeValue("gray.700", "gray.200")}
       w="100%"
-      pos="absolute"
+      pos="relative"
       bottom={0}
     >
       <Container
@@ -81,7 +81,7 @@ export default function Footer() {
           justify={{ base: "center", md: "space-between" }}
           align={{ base: "center", md: "center" }}
         >
-          <Text>© 2020 Park-A-Lot. All rights reserved</Text>
+          <Text>© 2022 Parkify. All rights reserved</Text>
           <Stack direction={"row"} spacing={6}>
             <SocialButton label={"Twitter"} href={"#"}>
               <FaTwitter />

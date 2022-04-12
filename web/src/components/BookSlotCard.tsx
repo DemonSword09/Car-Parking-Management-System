@@ -8,6 +8,7 @@ import {
   ListIcon,
   Button,
   useColorModeValue,
+  Link,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 
@@ -40,9 +41,9 @@ export default function BookSlotCard() {
             Book Slot
           </Text>
           <Stack direction={"row"} align={"center"} justify={"center"}>
-            <Text fontSize={"3xl"}>$</Text>
+            <Text fontSize={"3xl"}>₹</Text>
             <Text fontSize={"6xl"} fontWeight={800}>
-              5
+              20
             </Text>
             <Text color={"gray.500"}>/hour</Text>
           </Stack>
@@ -63,23 +64,29 @@ export default function BookSlotCard() {
               All features
             </ListItem>
           </List>
-
-          <Button
-            mt={10}
-            w={"full"}
-            bg={"green.400"}
-            color={"white"}
-            rounded={"xl"}
-            boxShadow={"0 5px 20px 0px rgb(72 187 120 / 43%)"}
+          <Link
+            href={"/book-slot"}
             _hover={{
-              bg: "green.500",
-            }}
-            _focus={{
-              bg: "green.500",
+              color: "white",
             }}
           >
-            Book Now
-          </Button>
+            <Button
+              mt={10}
+              w={"full"}
+              bg={"green.400"}
+              color={"white"}
+              rounded={"xl"}
+              boxShadow={"0 5px 20px 0px rgb(72 187 120 / 43%)"}
+              _hover={{
+                bg: "green.500",
+              }}
+              _focus={{
+                bg: "green.500",
+              }}
+            >
+              Book Now
+            </Button>
+          </Link>
         </Box>
       </Box>
     </Center>

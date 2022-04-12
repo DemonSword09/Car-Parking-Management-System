@@ -10,9 +10,10 @@ export const Container = (props: any) => {
     <Flex
       direction="column"
       alignItems="center"
-      justifyContent="flex-start"
+      justifyContent="space-between"
       bg={bgColor[colorMode]}
       color={color[colorMode]}
+      flexBasis={""}
       {...props}
     />
   );

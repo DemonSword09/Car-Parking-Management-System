@@ -1,9 +1,11 @@
 query getSlots {
   getSlots {
     id
-    cost
+    createdAt
     updatedAt
-    booked
-    bookedby
+    timings {
+      time
+      bookedby
+    }
   }
 }

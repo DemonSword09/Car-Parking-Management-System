@@ -6,7 +6,9 @@ import router from "next/router";
 import { NextPage } from "next";
 import { useBookSlotMutation } from "../../generated/graphql";
 const SlotBooking: NextPage<{ token: string }> = ({ token }) => {
-  const param = { id: parseInt(token) };
+  const param = { id: parseInt(token[0]) };
+  const n = parseInt(token[2]);
+
   const [, bookslot] = useBookSlotMutation();
   return (
     <Flex
@@ -23,10 +25,10 @@ const SlotBooking: NextPage<{ token: string }> = ({ token }) => {
           mx={2}
           variant="outline"
           onClick={async () => {
-            const val = await bookslot(param);
+            const val = await bookslot({ ...param, n });
             console.log(val.data);
 
-            if (val.data?.bookSlot) router.push("/book-slot");
+            if (val.data?.bookSlot) window.location.assign("/book-slot");
           }}
         >
           Pay

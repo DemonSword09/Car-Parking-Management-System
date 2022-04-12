@@ -4,12 +4,8 @@ import {
   useColorModeValue,
   Box,
   Button,
-  Checkbox,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
-  Input,
   Stack,
 } from "@chakra-ui/react";
 import { Container } from "../components/Container";
