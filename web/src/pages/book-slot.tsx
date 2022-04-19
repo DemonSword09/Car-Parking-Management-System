@@ -3,7 +3,7 @@ import { DarkModeSwitch } from "../components/DarkModeSwitch";
 import React, { useState } from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
-import { Box, Flex, Heading, HStack, Stack } from "@chakra-ui/layout";
+import { Box, Flex, Grid, Heading, HStack, Stack } from "@chakra-ui/layout";
 import {
   Button,
   NumberDecrementStepper,
@@ -12,7 +12,6 @@ import {
   NumberInputField,
   NumberInputStepper,
   Select,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
@@ -31,11 +30,11 @@ const BookSlot = () => {
   let y = 1;
   const fetchslots = (n: number) => {
     if (data?.getSlots) {
-      y = data.getSlots.length / 4;
+      y = data.getSlots.length / 5;
       // console.log(data.getSlots[0].timings[6].time);
 
       setbody(
-        <Stack direction="row">
+        <Grid gridTemplateColumns={"repeat(5, 1fr)"} gap={4}>
           {data.getSlots.map((slot) => (
             <Flex
               key={slot.id}
@@ -49,9 +48,8 @@ const BookSlot = () => {
               onClick={
                 !slot.timings[n].bookedby
                   ? () => {
-                      /*bookslot(val, j, slot, ind)*/ router.push(
-                        `/book/${slot.id}.${value}`
-                      );
+                      /*bookslot(val, j, slot, ind)*/
+                      router.push(`/book/${slot.id}.${value}`);
                     }
                   : undefined
               }
@@ -59,7 +57,7 @@ const BookSlot = () => {
               {slot.id}
             </Flex>
           ))}
-        </Stack>
+        </Grid>
       );
     } else {
       setbody(<Box>Error Fetching data!</Box>);
@@ -82,7 +80,7 @@ const BookSlot = () => {
   ];
 
   return (
-    <Container minH={"100vh"} minW={"100vw"}>
+    <Container minH={"100vh"} W={"100vw"}>
       <NavBar />
       <Stack>
         <Heading textAlign="center" my={6}>

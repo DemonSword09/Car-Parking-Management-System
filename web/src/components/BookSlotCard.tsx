@@ -49,7 +49,12 @@ export default function BookSlotCard() {
           </Stack>
         </Stack>
 
-        <Box bg={useColorModeValue("gray.50", "gray.900")} px={6} py={10}>
+        <Box
+          color={useColorModeValue("gray.800", "white")}
+          bg={useColorModeValue("gray.50", "gray.900")}
+          px={6}
+          py={10}
+        >
           <List spacing={3}>
             <ListItem>
               <ListIcon as={CheckIcon} color="green.400" />

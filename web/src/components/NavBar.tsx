@@ -19,7 +19,7 @@ export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
   const [{ data, fetching }] = useMeQuery();
   const [, logout] = useLogoutMutation();
-
+  // console.log(data);
   let body;
   if (fetching) {
   }
@@ -140,7 +140,7 @@ export default function NavBar() {
             mr={{ base: "auto", md: "initial" }}
             color={useColorModeValue("gray.800", "white")}
           >
-            Parkify
+            Parkathon
           </Text>
           <Flex
             display={{ base: "none", md: "flex" }}

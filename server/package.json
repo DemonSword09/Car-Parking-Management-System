@@ -46,12 +46,5 @@
     "typeorm": "^0.2.41",
     "uuid": "^8.3.2",
     "yarn": "^1.22.15"
-  },
-  "mikro-orm": {
-    "useTsNode": true,
-    "configPaths": [
-      "./src/mikro-orm.config.ts",
-      "./dist/mikro-orm.config.js"
-    ]
   }
 }
