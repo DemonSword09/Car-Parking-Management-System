@@ -22,8 +22,8 @@ import Razorpay from "razorpay";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    url: "postgres://mcisnjclqlkmtq:3708db137f72c2ef6381db6336b8c9a705a659f23df7057984f1ac28aae261e7@ec2-3-223-213-207.compute-1.amazonaws.com:5432/d6tjebug1thulo",
-    host: "ec2-3-223-213-207.compute-1.amazonaws.com",
+    url: POSTGRES_URL,
+    host: POSTGRES_HOSTNAME,
     logging: true,
     synchronize: true,
     entities: [Slot, User],
@@ -33,9 +33,9 @@ const main = async () => {
 
   const RedisStore = connectRedis(session);
   const redis = new Redis({
-    host: "redis-17973.c91.us-east-1-3.ec2.cloud.redislabs.com",
+    host: REDIS_URI,
     port: 17973,
-    password: "iF7mHpleOct4M1DZIkTrrbTfDR9MrPPL",
+    password: REDIS_PASSWORD,
   });
   app.use(
     cors({
