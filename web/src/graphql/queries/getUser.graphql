@@ -1,0 +1,9 @@
+query getUser($id: Float!) {
+  getUser(id: $id) {
+    id
+    username
+    email
+    mobileno
+    vehicles
+  }
+}

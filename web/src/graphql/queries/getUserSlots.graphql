@@ -1,0 +1,6 @@
+query getUserSlots {
+  getUserSlots {
+    id
+    time
+  }
+}

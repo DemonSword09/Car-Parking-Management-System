@@ -1,0 +1,11 @@
+query getSlots {
+  getSlots {
+    id
+    createdAt
+    updatedAt
+    timings {
+      time
+      bookedby
+    }
+  }
+}
