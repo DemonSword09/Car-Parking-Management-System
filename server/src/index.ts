@@ -6,20 +6,7 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import UserResolver from "./resolvers/user";
-import {
-  RAZOR_PAY_KEY_ID,
-  RAZOR_PAY_KEY_SECRET,
-  SECRECT,
-  __prod__,
-  POSTGRES_URL,
-  POSTGRES_HOSTNAME,
-  REDIS_URI,
-  REDIS_PASSWORD,
-  SUPABASE_URI,
-  SUPABASE_HOST,
-  SUPABASE_USER,
-  SUPABASE_PASSWORD,
-} from "./constants";
+import { RAZOR_PAY_KEY_ID, RAZOR_PAY_KEY_SECRET, __prod__ } from "./constants";
 import { MyContext } from "./types";
 import cors from "cors";
 import SlotResolver from "./resolvers/slot";
@@ -30,9 +17,9 @@ import Razorpay from "razorpay";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    host: SUPABASE_HOST,
-    username: SUPABASE_USER,
-    password: SUPABASE_PASSWORD,
+    host: process.env.SUPABASE_HOST,
+    username: process.env.SUPABASE_USER,
+    password: process.env.SUPABASE_PASSWORD,
     database: "postgres",
     schema: "car_parking",
     ssl: { rejectUnauthorized: false },
@@ -45,13 +32,17 @@ const main = async () => {
 
   const RedisStore = connectRedis(session);
   const redis = new Redis({
-    host: REDIS_URI,
+    host: process.env.REDIS_URI,
     port: 11916,
-    password: REDIS_PASSWORD,
+    password: process.env.REDIS_PASSWORD,
   });
   app.use(
     cors({
-      origin: ["https://parkathon.herokuapp.com", "http://localhost:3000"],
+      origin: [
+        "https://parkathon.herokuapp.com",
+        "http://localhost:3000",
+        "https://car-parking-management-system-8cjo-7kdkpg94e.vercel.app",
+      ],
       credentials: true,
     })
   );
@@ -71,7 +62,7 @@ const main = async () => {
         secure: false, //false in production
       },
       saveUninitialized: false,
-      secret: SECRECT,
+      secret: process.env.SECRECT || "",
       resave: false,
     })
   );

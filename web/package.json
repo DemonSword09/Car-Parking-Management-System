@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider &&  next dev",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider  && next build",
     "start": "next start",
     "gen": "graphql-codegen --config codegen.yml"
   },
