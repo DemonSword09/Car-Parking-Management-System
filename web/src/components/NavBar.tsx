@@ -14,6 +14,7 @@ import {
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import React from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
+import router from "next/router";
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
@@ -94,6 +95,7 @@ export default function NavBar() {
           }}
           onClick={() => {
             logout();
+            router.push(`/`);
           }}
         >
           Logout
@@ -250,10 +252,6 @@ const NAV_ITEMS: Array<NavItem> = [
   {
     label: "Home",
     href: "/",
-  },
-  {
-    label: "About",
-    href: "/about",
   },
   {
     label: "Book Slot",

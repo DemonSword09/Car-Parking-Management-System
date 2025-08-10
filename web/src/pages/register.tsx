@@ -18,6 +18,7 @@ import { toErrorMap } from "../utils/toErrorMap";
 import InputFeild from "../components/inputFeild";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
+import NavBar from "../components/NavBar";
 
 const Register = () => {
   const router = useRouter();
@@ -25,10 +26,13 @@ const Register = () => {
   return (
     <Container height="100vh">
       <DarkModeSwitch />
+      <NavBar />
       <Formik
         initialValues={{ email: "", username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await register({ options: values });
+          console.log(response);
+
           if (response.data?.addUser.errors) {
             setErrors(toErrorMap(response.data.addUser.errors));
           } else if (response.data?.addUser.user) {
@@ -38,7 +42,7 @@ const Register = () => {
       >
         {({ isSubmitting }) => (
           <Flex
-            minH={"100vh"}
+            minH={"90vh"}
             align={"center"}
             justify={"center"}
             bg={useColorModeValue("gray.50", "gray.1000")}

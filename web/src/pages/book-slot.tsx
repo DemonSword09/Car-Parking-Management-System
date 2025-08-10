@@ -26,12 +26,14 @@ const BookSlot = () => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setValue(event.target.value);
   };
-  const [{ data }] = useGetSlotsQuery();
+  const [{ data, error }] = useGetSlotsQuery();
   let y = 1;
   const fetchslots = (n: number) => {
+    console.log(data, error);
+
     if (data?.getSlots) {
       y = data.getSlots.length / 5;
-      // console.log(data.getSlots[0].timings[6].time);
+      console.log(data.getSlots[0].timings[6].time);
 
       setbody(
         <Grid gridTemplateColumns={"repeat(5, 1fr)"} gap={4}>

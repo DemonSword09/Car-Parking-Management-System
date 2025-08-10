@@ -11,6 +11,14 @@ import {
   RAZOR_PAY_KEY_SECRET,
   SECRECT,
   __prod__,
+  POSTGRES_URL,
+  POSTGRES_HOSTNAME,
+  REDIS_URI,
+  REDIS_PASSWORD,
+  SUPABASE_URI,
+  SUPABASE_HOST,
+  SUPABASE_USER,
+  SUPABASE_PASSWORD,
 } from "./constants";
 import { MyContext } from "./types";
 import cors from "cors";
@@ -22,8 +30,12 @@ import Razorpay from "razorpay";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    url: POSTGRES_URL,
-    host: POSTGRES_HOSTNAME,
+    host: SUPABASE_HOST,
+    username: SUPABASE_USER,
+    password: SUPABASE_PASSWORD,
+    database: "postgres",
+    schema: "car_parking",
+    ssl: { rejectUnauthorized: false },
     logging: true,
     synchronize: true,
     entities: [Slot, User],
@@ -34,7 +46,7 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redis = new Redis({
     host: REDIS_URI,
-    port: 17973,
+    port: 11916,
     password: REDIS_PASSWORD,
   });
   app.use(
@@ -75,7 +87,8 @@ const main = async () => {
       instance,
     }),
     playground: {
-      endpoint: `https://warm-hamlet-33828.herokuapp.com/graphql`,
+      //endpoint: `https://warm-hamlet-33828.herokuapp.com/graphql`,
+
       settings: {
         "editor.theme": "dark",
         "request.credentials": "include",
@@ -86,6 +99,8 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app, cors: false });
   app.set("port", process.env.PORT || 5000);
+  console.log(app.get("port"));
+
   //For avoidong Heroku $PORT error
   app.listen(app.get("port"), function () {
     console.log(

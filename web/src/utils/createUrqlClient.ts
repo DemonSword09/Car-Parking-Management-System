@@ -11,7 +11,8 @@ import { cacheExchange } from "@urql/exchange-graphcache";
 
 export const createUrqlClient = (ssrExchange: any) => {
   return {
-    url: "https://warm-hamlet-33828.herokuapp.com/graphql",
+    // url: "https://warm-hamlet-33828.herokuapp.com/graphql",
+    url: "http://localhost:5000/graphql",
     fetchOptions: {
       credentials: "include" as const,
     },
